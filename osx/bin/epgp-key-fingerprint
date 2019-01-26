@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# usage
+if [ $# -ne 1 ] || [ $1 == '--help' ]; then
+  echo "Usage: $(basename $0) <key_name>"
+  exit 0
+fi
+
+# get key fingerprint | skip first 2 lines | get first line | extract hex value
+gpg2 --with-colons --fingerprint "$1" | tail -n+3 | head -n1 | awk 'match($0, /[A-Z0-9]+/) { print substr($0, RSTART, RLENGTH )}'

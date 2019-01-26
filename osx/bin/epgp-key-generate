@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# usage
+if [ $# -ne 1 ] || [ $1 == '--help' ]; then
+  echo "Usage: $(basename $0) <key_name>"
+  exit 0
+fi
+
+# generate parent key ECDSA secp256k1
+gpg2 --quick-gen-key "$1" secp256k1 sign 0
+
+# get key fingerprint | skip first 2 lines | get first line | extract hex value
+BASE_PATH=$(dirname $0)
+FINGERPRINT=$($BASE_PATH/epgp-key-fingerprint $1)
+
+# generate child key ECDH secp256k1
+gpg2 --quick-add-key "$FINGERPRINT" secp256k1 encrypt 0

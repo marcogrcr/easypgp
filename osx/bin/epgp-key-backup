@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# usage
+if [ $# -eq 0 ] || [ $1 == '--help' ]; then
+  echo "Usage: $(basename $0) <key_name> <key_file>"
+  exit 0
+fi
+
+# get key fingerprint | skip first 2 lines | get first line | extract hex value
+BASE_PATH=$(dirname $0)
+FINGERPRINT=$($BASE_PATH/epgp-key-fingerprint $1)
+
+# backup key
+gpg2 -o $2 --export-secret-keys $fingerprint

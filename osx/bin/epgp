@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# usage
+if [ $# -lt 2 ] || [ $1 == '--help' ]; then
+  echo 'Usage: epgp <key_name> <files>'
+  exit 0
+fi
+
+# encrypt/decrypt file
+gpg () {
+  if [[ "$2" == *.gpg ]]; then
+    echo "Decrypting: $2"
+    gpg2 -q -o "${2%.*}" -d "$2"
+  else
+    echo "Encrypting: $2"
+    gpg2 -r $1 -e "$2"
+  fi
+
+  # delete original file if exit code is successful
+  if [ $? -eq 0 ]; then
+    rm "$2"
+  fi
+}
+
+# set key
+KEY=$1
+
+# for each argument
+for arg in "${@:2}"; do
+  if [ -f "$arg" ]; then
+    # argument is file, encrypt/decrypt file
+    gpg "$KEY" "$arg"
+  elif [ -d "$arg" ]; then
+    # argument is folder, traverse recursively
+    find $arg ! -path $arg -type f | while read file; do
+      # encrypt/decrypt traversed file
+      gpg "$KEY" "$file"
+    done
+  else
+    echo "ERROR: No file or directory named: $arg" 1>&2
+    exit 1
+  fi
+done
